@@ -1,0 +1,41 @@
+{
+  "name": "cola-mall",
+  "version": "1.0.0",
+  "private": true,
+  "description": "可乐商城 - Vue3 + Element Plus 电商前端",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.18.1",
+    "element-plus": "^2.14.2",
+    "vue": "beta",
+    "vue-router": "^5.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.7",
+    "vite": "^8.0.16",
+    "vite-plugin-vue-devtools": "^8.1.2"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.12.0"
+  },
+  "overrides": {
+    "vue": "beta",
+    "@vue/compiler-core": "beta",
+    "@vue/compiler-dom": "beta",
+    "@vue/compiler-sfc": "beta",
+    "@vue/compiler-ssr": "beta",
+    "@vue/compiler-vapor": "beta",
+    "@vue/reactivity": "beta",
+    "@vue/runtime-core": "beta",
+    "@vue/runtime-dom": "beta",
+    "@vue/runtime-vapor": "beta",
+    "@vue/server-renderer": "beta",
+    "@vue/shared": "beta",
+    "@vue/compat": "beta"
+  }
+}

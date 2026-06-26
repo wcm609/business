@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const bcrypt = require\\('bcryptjs'\\); console.log\\(bcrypt.hashSync\\('123456', 10\\)\\); console.log\\(bcrypt.hashSync\\('admin123', 10\\)\\);\")",
+      "Bash(npm install *)",
+      "Bash(taskkill //F //PID 15192)",
+      "Bash(taskkill //F //PID 19800)"
+    ]
+  }
+}
