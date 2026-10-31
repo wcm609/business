@@ -116,6 +116,8 @@ mysql -u root -p business < init-data.sql
 
 ### 3. 启动后端
 
+启动前请在运行环境中配置 `DB_USERNAME` 和 `DB_PASSWORD` 环境变量，并使用仅拥有该数据库所需权限的专用账号。不要将数据库凭据写入配置文件或提交到版本控制。
+
 ```bash
 cd backend
 mvn spring-boot:run
