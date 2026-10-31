@@ -20,7 +20,7 @@ CREATE DATABASE business CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 ### 2. 配置数据库连接
 
-修改 `src/main/resources/application.yml` 中的数据库用户名和密码。
+为运行环境配置 `DB_USERNAME` 和 `DB_PASSWORD` 环境变量。请使用仅拥有该数据库所需权限的专用账号，不要将凭据写入配置文件或提交到版本控制。
 
 ### 3. 运行
 
