@@ -1,0 +1,101 @@
+/**
+ * 登录 / 注册表单共用样式
+ * 类名统一使用 auth- 前缀，避免与页面内样式冲突。
+ */
+
+.auth-form-head {
+  margin-bottom: 28px;
+}
+
+.auth-form-head h2 {
+  margin-top: 10px;
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--c-ink);
+}
+
+.auth-form-head p {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--c-ink-3);
+}
+
+.auth-form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: -2px 0 22px;
+}
+
+.auth-submit {
+  width: 100%;
+  height: 48px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.auth-switch {
+  margin-top: 26px;
+  font-size: 13px;
+  text-align: center;
+  color: var(--c-ink-3);
+}
+
+.auth-switch a {
+  margin-left: 4px;
+  font-weight: 600;
+  color: var(--c-brand);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur) var(--ease-soft);
+}
+
+.auth-switch a:hover {
+  border-bottom-color: currentColor;
+}
+
+.auth-link-btn {
+  font-size: 13px;
+  color: var(--c-ink-3);
+  transition: color var(--dur) var(--ease-soft);
+}
+
+.auth-link-btn:hover {
+  color: var(--c-brand);
+}
+
+.auth-demo-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border: 1px dashed rgba(176, 138, 79, 0.45);
+  border-radius: var(--radius-md);
+  background: var(--c-gold-soft);
+  font-size: 12px;
+  color: #7a5a27;
+}
+
+.auth-pwd-toggle {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--c-ink-3);
+  transition: color var(--dur) var(--ease-soft), background-color var(--dur) var(--ease-soft);
+}
+
+.auth-pwd-toggle:hover {
+  color: var(--c-ink);
+  background: var(--c-surface-2);
+}
+
+/* 输入框前缀图标颜色更柔和 */
+.auth__panel .el-input__prefix-inner .el-icon {
+  color: var(--c-ink-3);
+}

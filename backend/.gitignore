@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# 本地数据库账号，不提交到仓库
+src/main/resources/application-local.yml
+
 ### STS ###
 .apt_generated
 .classpath

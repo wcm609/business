@@ -1,0 +1,329 @@
+/**
+ * 深色主题补丁
+ *
+ * 设计变量已在 tokens.css 中切换，这里只处理两类内容：
+ * 1. 组件里写死的浅色渐变 / 玻璃层 / 固定浅色区域
+ * 2. Element Plus 在深色下需要保持品牌暖色调的变量
+ *
+ * 商品图所在的“相纸”区域保持浅色，白底商品图在深色界面中仍能自然呈现。
+ */
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* ---------- Element Plus 暖色深色主题 ---------- */
+  --el-color-primary: #e26850;
+  --el-color-primary-light-3: #ef8d77;
+  --el-color-primary-light-5: #f2a494;
+  --el-color-primary-light-7: rgba(226, 104, 80, 0.35);
+  --el-color-primary-light-8: rgba(226, 104, 80, 0.2);
+  --el-color-primary-light-9: rgba(226, 104, 80, 0.12);
+  --el-color-primary-dark-2: #c54831;
+
+  --el-color-success: #74c39c;
+  --el-color-success-light-9: rgba(116, 195, 156, 0.12);
+  --el-color-warning: #e0a45a;
+  --el-color-warning-light-9: rgba(224, 164, 90, 0.12);
+  --el-color-danger: #e26850;
+  --el-color-danger-light-9: rgba(226, 104, 80, 0.12);
+  --el-color-error: #e26850;
+  --el-color-info: #a6a096;
+  --el-color-info-light-9: rgba(166, 160, 150, 0.12);
+
+  --el-text-color-primary: #f3efe6;
+  --el-text-color-regular: #c9c2b6;
+  --el-text-color-secondary: #968e82;
+  --el-text-color-placeholder: #7d766c;
+  --el-text-color-disabled: #5c564e;
+
+  --el-border-color: #332e28;
+  --el-border-color-light: #2c2722;
+  --el-border-color-lighter: #26221d;
+  --el-border-color-extra-light: #221e1a;
+  --el-border-color-dark: #4b4339;
+  --el-border-color-darker: #5a5146;
+
+  --el-bg-color: #211d19;
+  --el-bg-color-page: #141210;
+  --el-bg-color-overlay: #26221d;
+  --el-fill-color: #2a2520;
+  --el-fill-color-light: #2a2520;
+  --el-fill-color-lighter: #24201c;
+  --el-fill-color-extra-light: #201c18;
+  --el-fill-color-dark: #332e28;
+  --el-fill-color-darker: #3c352e;
+  --el-fill-color-blank: #211d19;
+}
+
+/* 页面背景光晕 */
+html[data-theme='dark'] body {
+  background-color: var(--c-bg);
+  background-image:
+    radial-gradient(1000px 520px at 12% -12%, rgba(226, 104, 80, 0.11), transparent 60%),
+    radial-gradient(900px 520px at 92% -8%, rgba(214, 173, 112, 0.08), transparent 62%);
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #4b4339;
+  background-clip: content-box;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #5d5448;
+  background-clip: content-box;
+}
+
+/* ---------- 商品图片上的固定浅色元素 ---------- */
+html[data-theme='dark'] .pcard__action {
+  /* 快捷按钮位于浅色商品图上，文字保持深色 */
+  color: #191713;
+}
+
+html[data-theme='dark'] .pcard__action:disabled {
+  color: #8d8578;
+}
+
+html[data-theme='dark'] .pcard__fav {
+  color: #6b655c;
+}
+
+html[data-theme='dark'] .pcard__badge--muted {
+  background: #5c564e;
+}
+
+html[data-theme='dark'] .gallery__index {
+  color: #3a352f;
+}
+
+/* 深色背景下让头像更有辨识度 */
+html[data-theme='dark'] .user-chip__avatar,
+html[data-theme='dark'] .account__avatar {
+  background: var(--grad-brand);
+  box-shadow: 0 18px 30px -18px rgba(226, 104, 80, 0.7);
+}
+
+/* ---------- 导航 / 页脚 ---------- */
+html[data-theme='dark'] .navbar {
+  background: rgba(20, 18, 16, 0.72);
+}
+
+html[data-theme='dark'] .navbar.is-scrolled {
+  background: rgba(20, 18, 16, 0.94);
+  border-bottom-color: var(--c-line);
+  box-shadow: 0 12px 30px -24px rgba(0, 0, 0, 0.9);
+}
+
+html[data-theme='dark'] .nav-search,
+html[data-theme='dark'] .icon-btn,
+html[data-theme='dark'] .user-chip,
+html[data-theme='dark'] .settings__icon,
+html[data-theme='dark'] .settings__lang {
+  background: var(--c-glass);
+}
+
+html[data-theme='dark'] .nav-search:focus-within,
+html[data-theme='dark'] .icon-btn:hover,
+html[data-theme='dark'] .user-chip:hover {
+  background: var(--c-surface);
+}
+
+html[data-theme='dark'] .icon-btn__badge {
+  border-color: var(--c-bg-soft);
+}
+
+html[data-theme='dark'] .footer {
+  background: rgba(26, 23, 20, 0.7);
+}
+
+/* ---------- 首屏 ---------- */
+html[data-theme='dark'] .hero {
+  background:
+    radial-gradient(120% 130% at 0% 0%, #2b2620 0%, #221e19 45%, #1a1714 100%);
+}
+
+html[data-theme='dark'] .hero::after {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+}
+
+html[data-theme='dark'] .hero__float {
+  background: var(--c-surface);
+  color: var(--c-ink);
+}
+
+html[data-theme='dark'] .hero__ring {
+  border-color: rgba(226, 104, 80, 0.32);
+}
+
+html[data-theme='dark'] .catalog__mode {
+  color: var(--c-gold);
+}
+
+/* ---------- 筛选 / 工具栏 ---------- */
+html[data-theme='dark'] .toolbar__search {
+  background: var(--c-bg-soft);
+}
+
+html[data-theme='dark'] .toolbar__search:focus-within {
+  background: var(--c-surface);
+}
+
+html[data-theme='dark'] .chip:hover {
+  background: var(--c-surface-2);
+}
+
+/* ---------- 骨架屏 ---------- */
+html[data-theme='dark'] .skeleton,
+html[data-theme='dark'] .order-skeleton,
+html[data-theme='dark'] .detail__skeleton {
+  background: var(--c-surface);
+  border-color: var(--c-line);
+}
+
+html[data-theme='dark'] .skeleton__media,
+html[data-theme='dark'] .skeleton__line,
+html[data-theme='dark'] .order-skeleton__img,
+html[data-theme='dark'] .order-skeleton .line,
+html[data-theme='dark'] .detail__skeleton-img,
+html[data-theme='dark'] .detail__skeleton-info .line {
+  background: linear-gradient(100deg, #26221d 30%, #322d26 50%, #26221d 70%);
+  background-size: 300% 100%;
+}
+
+/* ---------- 商品详情 ---------- */
+html[data-theme='dark'] .info__price {
+  background: linear-gradient(120deg, rgba(226, 104, 80, 0.18), rgba(226, 104, 80, 0.04) 70%);
+}
+
+html[data-theme='dark'] .buybox {
+  background: var(--c-bg-soft);
+}
+
+html[data-theme='dark'] .stepper {
+  background: var(--c-surface);
+}
+
+html[data-theme='dark'] .buybox__fav {
+  background: var(--c-surface);
+}
+
+html[data-theme='dark'] .buybox__fav:hover {
+  background: var(--c-gold-soft);
+}
+
+/* ---------- 订单 ---------- */
+html[data-theme='dark'] .tabs__count {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme='dark'] .tabs__item.is-active .tabs__count {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme='dark'] .status--muted {
+  background: var(--c-surface-2);
+}
+
+/* ---------- 个人中心 ---------- */
+html[data-theme='dark'] .account__top {
+  background:
+    radial-gradient(120% 100% at 50% 0%, #2c2721 0%, #221e19 60%, #1a1714 100%);
+}
+
+html[data-theme='dark'] .stat:hover,
+html[data-theme='dark'] .favorite:hover {
+  background: var(--c-surface-2);
+}
+
+html[data-theme='dark'] .favorite__img {
+  background: #f6f2ea;
+}
+
+/* ---------- 登录 / 注册 ---------- */
+html[data-theme='dark'] .auth {
+  background: var(--c-bg);
+}
+
+html[data-theme='dark'] .auth__aside {
+  background:
+    radial-gradient(120% 90% at 0% 0%, #2d2721 0%, #221e19 48%, #1a1714 100%);
+}
+
+html[data-theme='dark'] .auth__aside::after {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+html[data-theme='dark'] .auth__points {
+  border-top-color: var(--c-line);
+}
+
+html[data-theme='dark'] .auth__visual-frame {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+html[data-theme='dark'] .auth-demo-tip {
+  color: var(--c-gold);
+  border-color: rgba(214, 173, 112, 0.45);
+}
+
+/* ---------- 购物车 ---------- */
+html[data-theme='dark'] .cart-item {
+  background: var(--c-surface);
+}
+
+html[data-theme='dark'] .cart-item__img {
+  background: linear-gradient(180deg, #fbfaf7, #f1ece4);
+  /* 浅色缩略图在深色卡片上不再使用正片叠底，避免整体变暗 */
+  mix-blend-mode: normal;
+}
+
+html[data-theme='dark'] .favorite__img {
+  mix-blend-mode: normal;
+}
+
+html[data-theme='dark'] .cart-item__remove {
+  color: var(--c-ink-3);
+}
+
+/* ---------- Element Plus 细节 ---------- */
+html[data-theme='dark'] .el-message {
+  background: rgba(38, 34, 29, 0.96);
+  border-color: var(--c-line);
+  color: var(--c-ink);
+}
+
+html[data-theme='dark'] .el-overlay {
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+html[data-theme='dark'] .el-input__wrapper,
+html[data-theme='dark'] .el-textarea__inner,
+html[data-theme='dark'] .el-select__wrapper {
+  background-color: var(--c-surface);
+}
+
+html[data-theme='dark'] .el-button {
+  --el-button-hover-bg-color: var(--c-surface-2);
+  --el-button-hover-text-color: var(--c-ink);
+}
+
+html[data-theme='dark'] .el-pagination.is-background .el-pager li,
+html[data-theme='dark'] .el-pagination.is-background .btn-prev,
+html[data-theme='dark'] .el-pagination.is-background .btn-next {
+  background: var(--c-surface);
+  border-color: var(--c-line);
+  color: var(--c-ink-2);
+}
+
+html[data-theme='dark'] .el-pagination.is-background .el-pager li.is-active {
+  background: var(--c-solid);
+  border-color: var(--c-solid);
+  color: var(--c-on-solid);
+}
+
+html[data-theme='dark'] .el-backtop {
+  background: var(--c-surface);
+  border-color: var(--c-line);
+  color: var(--c-ink);
+}
