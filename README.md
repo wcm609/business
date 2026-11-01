@@ -70,7 +70,7 @@ ecommerce/
 │       └── application-local.yml.example
 │
 ├── frontend/                         # Vue 3 前端
-│   ├── public/images.jpg             # 全站统一商品图
+│   ├── public/images.jpg             # 全站统一商品图（运行时使用）
 │   └── src/
 │       ├── api/                      # Axios 封装 + 演示数据降级
 │       ├── components/               # 导航栏、页脚、商品卡片、购物车抽屉、认证布局、设置
@@ -81,6 +81,8 @@ ecommerce/
 │       ├── utils/                    # 金额、日期、订单状态、存储工具
 │       └── views/                    # 6 个页面
 │
+├── images.jpg                        # 商品图原始素材（与 public 副本内容一致）
+├── api-docs.json                     # 旧版 OpenAPI 静态快照
 └── init-data.sql                     # 建库建表 + 演示账号 + 12 件商品 + 4 条订单
 ```
 
@@ -263,7 +265,7 @@ npm run dev
 - **浏览器重置**：`styles/reset.css` 清除默认边距、统一盒模型、媒体元素与表单字体，并处理键盘焦点与减弱动效偏好。
 - **柔和过渡**：卡片悬停上浮 + 图片缓慢缩放 + 阴影加深，统一 0.28s 缓动；页面切换使用淡入上移过渡。
 - **布局留白**：1200px 内容宽度、4/3/2/1 列响应式网格、统一间距节奏，移动端重新组织工具栏与卡片。
-- **商品图统一**：所有商品使用 `public/images.jpg`，通过 `object-fit: contain` + `mix-blend-mode: multiply` 融入暖色背景，避免白底图突兀。
+- **商品图统一**：所有商品使用 `frontend/public/images.jpg`，通过 `object-fit: contain` + `mix-blend-mode: multiply` 融入暖色背景，避免白底图突兀。项目根目录的 `images.jpg` 为同内容原始素材。
 - **状态管理**：`useAuth` / `useCart` / `useFavorites` 单例组合式函数，配合 localStorage 持久化，登录状态变化实时反映到导航栏。
 - **健壮性**：骨架屏、空状态、加载失败提示、401 自动跳转、请求超时与后端不可用降级。
 
