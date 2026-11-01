@@ -1,425 +1,703 @@
 <template>
-  <div class="orders-page">
-    <div class="page-header">
-      <h1 class="page-title">我的订单</h1>
-      <el-button class="back-btn" @click="goShopping">
-        <el-icon><ArrowLeft /></el-icon> 继续购物
+  <div class="orders container page">
+    <!-- 页头 -->
+    <header class="orders__head">
+      <div>
+        <p class="eyebrow">{{ t('orders.eyebrow') }}</p>
+        <h1 class="page-title">{{ t('orders.title') }}</h1>
+        <p class="page-subtitle">{{ t('orders.subtitle') }}</p>
+      </div>
+      <el-button round class="orders__back" @click="router.push('/products')">
+        <el-icon><ArrowLeft /></el-icon>
+        {{ t('orders.continueShopping') }}
       </el-button>
-    </div>
+    </header>
 
-    <!-- Tab 切换 -->
-    <el-tabs v-model="activeTab" class="order-tabs" @tab-change="fetchOrders">
-      <el-tab-pane label="📋 全部" name="all" />
-      <el-tab-pane label="⏳ 待付款" name="0" />
-      <el-tab-pane label="✅ 已付款" name="1" />
-      <el-tab-pane label="🎉 已收货" name="3" />
-      <el-tab-pane label="❌ 已取消" name="4" />
-    </el-tabs>
+    <!-- 状态筛选 -->
+    <div class="tabs" role="tablist" :aria-label="t('orders.title')">
+      <button
+        v-for="tab in orderTabs"
+        :key="tab.key"
+        type="button"
+        role="tab"
+        class="tabs__item"
+        :class="{ 'is-active': activeTab === tab.key }"
+        :aria-selected="activeTab === tab.key"
+        @click="activeTab = tab.key"
+      >
+        {{ t(tab.labelKey) }}
+        <span class="tabs__count">{{ countOf(tab.key) }}</span>
+      </button>
+    </div>
 
     <!-- 加载 -->
-    <div v-if="loading" class="loading-container">
-      <div class="loader">
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
+    <div v-if="loading" class="order-list" aria-busy="true">
+      <div v-for="n in 3" :key="n" class="order-skeleton">
+        <div class="order-skeleton__head">
+          <span class="line line--sm"></span>
+          <span class="line line--xs"></span>
+        </div>
+        <div class="order-skeleton__body">
+          <span class="order-skeleton__img"></span>
+          <div class="order-skeleton__lines">
+            <span class="line line--md"></span>
+            <span class="line line--full"></span>
+            <span class="line line--sm"></span>
+          </div>
+        </div>
       </div>
-      <p>正在加载订单...</p>
     </div>
 
-    <!-- 空数据 -->
-    <div v-else-if="orders.length === 0" class="empty-container">
-      <div class="empty-icon">📦</div>
-      <p class="empty-text">暂无订单</p>
-      <el-button type="primary" class="shop-btn" @click="goShopping">
-        <el-icon><ShoppingCart /></el-icon> 去购物
+    <!-- 空状态 -->
+    <EmptyState
+      v-else-if="filteredOrders.length === 0"
+      :icon="ShoppingCart"
+      :title="emptyText.title"
+      :description="emptyText.description"
+    >
+      <el-button type="primary" round @click="router.push('/products')">
+        <el-icon><ShoppingBag /></el-icon>
+        {{ t('common.browse') }}
       </el-button>
-    </div>
+    </EmptyState>
 
     <!-- 订单列表 -->
     <div v-else class="order-list">
-      <transition-group name="order-anim">
-        <div
-          v-for="order in orders"
-          :key="order.orderId"
-          class="order-card"
-        >
-          <!-- 头部 -->
-          <div class="order-header">
-            <div class="order-meta">
-              <span class="order-id">#{{ order.orderId }}</span>
-              <span class="order-time">{{ formatDate(order.orderCreateTime) }}</span>
-            </div>
-            <el-tag
-              :type="orderStatusMap[order.orderStatus]?.type || 'info'"
-              size="large"
-              effect="dark"
-              class="status-tag"
-            >
-              {{ orderStatusMap[order.orderStatus]?.text || '未知' }}
-            </el-tag>
+      <article v-for="order in filteredOrders" :key="order.orderId" class="order">
+        <header class="order__head">
+          <div class="order__meta">
+            <span class="order__id">
+              {{ t('orders.orderId') }} <strong>#{{ order.orderId }}</strong>
+            </span>
+            <span class="order__sep" aria-hidden="true"></span>
+            <time class="order__time">{{ formatDate(order.orderCreateTime) }}</time>
           </div>
+          <span class="status" :class="`status--${getOrderStatus(order.orderStatus).tone}`">
+            <i class="status__dot" aria-hidden="true"></i>
+            {{ t(getOrderStatus(order.orderStatus).labelKey) }}
+          </span>
+        </header>
 
-          <!-- 内容 -->
-          <div class="order-body">
-            <div class="order-info-grid">
-              <div class="order-info-item">
-                <span class="info-icon">🆔</span>
-                <div>
-                  <div class="info-label">商品 ID</div>
-                  <div class="info-value">{{ order.productId }}</div>
-                </div>
-              </div>
-              <div class="order-info-item">
-                <span class="info-icon">📦</span>
-                <div>
-                  <div class="info-label">购买数量</div>
-                  <div class="info-value">{{ order.orderQuantity }} 件</div>
-                </div>
-              </div>
-              <div class="order-info-item">
-                <span class="info-icon">💰</span>
-                <div>
-                  <div class="info-label">订单总价</div>
-                  <div class="info-value price-value">¥{{ order.orderPrice }}</div>
-                </div>
-              </div>
-              <div class="order-info-item address-item">
-                <span class="info-icon">📍</span>
-                <div>
-                  <div class="info-label">收货地址</div>
-                  <div class="info-value address-value">{{ order.orderAddress }}</div>
-                </div>
-              </div>
+        <div class="order__body">
+          <RouterLink :to="`/product/${order.productId}`" class="order__thumb">
+            <img :src="PRODUCT_IMAGE" alt="" />
+          </RouterLink>
+
+          <div class="order__product">
+            <RouterLink :to="`/product/${order.productId}`" class="order__name">
+              {{ order.productName || t('orders.productFallback', { id: order.productId }) }}
+            </RouterLink>
+            <p class="order__desc">{{ order.productDescription || t('card.descFallback') }}</p>
+            <div class="order__tags">
+              <span>{{ t('orders.quantity', { count: order.orderQuantity }) }}</span>
+              <span>{{ t('orders.unitPrice', { price: formatPrice(order.productPrice) }) }}</span>
             </div>
           </div>
 
-          <!-- 底部操作 -->
-          <div class="order-footer">
-            <div class="order-actions">
-              <el-button
-                v-if="order.orderStatus === 0"
-                type="primary"
-                class="action-btn pay-btn"
-                @click="handlePay(order.orderId)"
-              >
-                💳 付款
-              </el-button>
-              <el-button
-                v-if="order.orderStatus === 0"
-                class="action-btn cancel-btn"
-                @click="handleCancel(order.orderId)"
-              >
-                取消订单
-              </el-button>
-              <el-button
-                v-if="order.orderStatus === 1"
-                type="success"
-                class="action-btn confirm-btn"
-                @click="handleConfirm(order.orderId)"
-              >
-                ✅ 确认收货
-              </el-button>
-            </div>
+          <div class="order__amount">
+            <span>{{ t('orders.amount') }}</span>
+            <strong>¥{{ formatPrice(order.orderPrice) }}</strong>
           </div>
         </div>
-      </transition-group>
+
+        <footer class="order__foot">
+          <p class="order__address">
+            <el-icon :size="13"><Location /></el-icon>
+            {{ order.orderAddress || t('orders.addressMissing') }}
+          </p>
+
+          <div class="order__actions">
+            <el-button
+              v-if="Number(order.orderStatus) === 0"
+              round
+              @click="handleCancel(order)"
+            >
+              {{ t('orders.cancel') }}
+            </el-button>
+            <el-button
+              v-if="Number(order.orderStatus) === 0"
+              type="primary"
+              round
+              :loading="processingId === order.orderId"
+              @click="handlePay(order)"
+            >
+              {{ t('orders.pay') }}
+            </el-button>
+            <el-button
+              v-if="Number(order.orderStatus) === 1"
+              type="primary"
+              round
+              :loading="processingId === order.orderId"
+              @click="handleConfirm(order)"
+            >
+              {{ t('orders.confirm') }}
+            </el-button>
+            <el-button
+              v-if="Number(order.orderStatus) === 3"
+              round
+              @click="router.push(`/product/${order.productId}`)"
+            >
+              {{ t('orders.buyAgain') }}
+            </el-button>
+          </div>
+        </footer>
+      </article>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, ShoppingCart } from '@element-plus/icons-vue'
+import { ArrowLeft, Location, ShoppingBag, ShoppingCart } from '@element-plus/icons-vue'
+import EmptyState from '../components/EmptyState.vue'
+import { PRODUCT_IMAGE } from '../config'
 import { orderApi } from '../api'
-import { orderStatusMap, formatDate } from '../utils'
+import { useI18n } from '../i18n'
+import { formatDate, formatPrice, getOrderStatus, orderTabs, showError } from '../utils'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 
-const activeTab = ref('all')
 const orders = ref([])
-const loading = ref(false)
+const loading = ref(true)
+const activeTab = ref('all')
+const processingId = ref(null)
 
-onMounted(() => {
-  if (route.query.tab) {
-    activeTab.value = route.query.tab
-  }
-  fetchOrders()
+/* ---------------- 计算 ---------------- */
+const filteredOrders = computed(() => {
+  const list = [...orders.value].sort((a, b) =>
+    String(b.orderCreateTime || '').localeCompare(String(a.orderCreateTime || ''))
+  )
+  if (activeTab.value === 'all') return list
+  return list.filter((order) => String(order.orderStatus) === activeTab.value)
 })
 
-const fetchOrders = async () => {
+const countOf = (key) => {
+  if (key === 'all') return orders.value.length
+  return orders.value.filter((order) => String(order.orderStatus) === key).length
+}
+
+const emptyText = computed(() => {
+  if (activeTab.value === 'all') {
+    return {
+      title: t('orders.emptyAllTitle'),
+      description: t('orders.emptyAllDesc')
+    }
+  }
+  const tab = orderTabs.find((item) => item.key === activeTab.value)
+  return {
+    title: t('orders.emptyFilterTitle', { status: tab ? t(tab.labelKey) : '' }),
+    description: t('orders.emptyFilterDesc')
+  }
+})
+
+/* ---------------- 数据加载 ---------------- */
+const loadOrders = async () => {
   loading.value = true
   try {
-    const userId = localStorage.getItem('userId')
-    const res = await orderApi.list(userId)
-    if (res.code === 200) {
-      let list = res.data
-      if (Array.isArray(list)) {
-        if (activeTab.value !== 'all') {
-          list = list.filter(item => String(item.orderStatus) === activeTab.value)
-        }
-        list.sort((a, b) => {
-          const ta = a.orderCreateTime || ''
-          const tb = b.orderCreateTime || ''
-          return String(tb).localeCompare(String(ta))
-        })
-        orders.value = list
-      } else {
-        orders.value = []
-      }
-    }
-  } catch (e) { orders.value = [] }
-  finally { loading.value = false }
-}
-
-const handlePay = async (orderId) => {
-  try {
-    const res = await orderApi.pay(orderId)
-    if (res.code === 200) {
-      ElMessage.success('🎉 付款成功')
-      fetchOrders()
-    }
-  } catch (e) {}
-}
-
-const handleCancel = async (orderId) => {
-  try {
-    await ElMessageBox.confirm('确定要取消该订单吗？', '提示', {
-      confirmButtonText: '确定取消',
-      cancelButtonText: '再想想',
-      type: 'warning',
-      confirmButtonClass: 'el-button--danger'
-    })
-    const res = await orderApi.cancel(orderId)
-    if (res.code === 200) {
-      ElMessage.success('订单已取消')
-      fetchOrders()
-    }
-  } catch (e) {
-    if (e !== 'cancel') { /* 忽略取消 */ }
+    const res = await orderApi.list()
+    orders.value = Array.isArray(res.data) ? res.data : res.data?.records || []
+  } catch (error) {
+    orders.value = []
+    showError(error, t('orders.loadError'))
+  } finally {
+    loading.value = false
   }
 }
 
-const handleConfirm = async (orderId) => {
-  try {
-    const res = await orderApi.confirm(orderId)
-    if (res.code === 200) {
-      ElMessage.success('✅ 已确认收货')
-      fetchOrders()
+onMounted(() => {
+  if (typeof route.query.tab === 'string') {
+    const valid = orderTabs.some((tab) => tab.key === route.query.tab)
+    activeTab.value = valid ? route.query.tab : 'all'
+  }
+  loadOrders()
+})
+
+watch(
+  () => route.query.tab,
+  (tab) => {
+    if (typeof tab === 'string' && orderTabs.some((item) => item.key === tab)) {
+      activeTab.value = tab
     }
-  } catch (e) {}
+  }
+)
+
+/* ---------------- 订单操作 ---------------- */
+const handlePay = async (order) => {
+  processingId.value = order.orderId
+  try {
+    await orderApi.pay(order.orderId)
+    ElMessage.success(t('orders.paySuccess'))
+    await loadOrders()
+  } catch (error) {
+    showError(error, t('orders.payFailed'))
+  } finally {
+    processingId.value = null
+  }
 }
 
-const goShopping = () => router.push('/products')
+const handleCancel = async (order) => {
+  try {
+    await ElMessageBox.confirm(t('orders.cancelMessage'), t('orders.cancelTitle'), {
+      confirmButtonText: t('orders.cancelConfirm'),
+      cancelButtonText: t('orders.cancelBack'),
+      type: 'warning'
+    })
+  } catch {
+    return
+  }
+
+  processingId.value = order.orderId
+  try {
+    await orderApi.cancel(order.orderId)
+    ElMessage.success(t('orders.cancelSuccess'))
+    await loadOrders()
+  } catch (error) {
+    showError(error, t('orders.cancelFailed'))
+  } finally {
+    processingId.value = null
+  }
+}
+
+const handleConfirm = async (order) => {
+  try {
+    await ElMessageBox.confirm(t('orders.confirmMessage'), t('orders.confirmTitle'), {
+      confirmButtonText: t('orders.confirmConfirm'),
+      cancelButtonText: t('orders.confirmBack'),
+      type: 'info'
+    })
+  } catch {
+    return
+  }
+
+  processingId.value = order.orderId
+  try {
+    await orderApi.confirm(order.orderId)
+    ElMessage.success(t('orders.confirmSuccess'))
+    await loadOrders()
+  } catch (error) {
+    showError(error, t('orders.confirmFailed'))
+  } finally {
+    processingId.value = null
+  }
+}
 </script>
 
 <style scoped>
-.orders-page {
-  max-width: 900px;
-  margin: 84px auto 40px;
-  padding: 0 20px;
-}
-
-.page-header {
+.orders__head {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.page-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #303133;
-  margin: 0;
-}
-
-.back-btn {
-  border-radius: 20px;
-}
-
-.order-tabs { margin-bottom: 20px; }
-
-.order-tabs :deep(.el-tabs__item) {
-  font-size: 15px;
-  padding: 0 16px;
-}
-
-.order-tabs :deep(.el-tabs__active-bar) {
-  height: 3px;
-  border-radius: 3px;
-}
-
-/* 加载 */
-.loading-container {
-  text-align: center;
-  padding: 80px 0;
-}
-.loader {
-  display: flex; justify-content: center; gap: 8px; margin-bottom: 20px;
-}
-.loader-dot {
-  width: 12px; height: 12px; border-radius: 50%;
-  background: #409EFF;
-  animation: dotBounce 1.4s ease-in-out infinite both;
-}
-.loader-dot:nth-child(1) { animation-delay: -0.32s; }
-.loader-dot:nth-child(2) { animation-delay: -0.16s; }
-.loader-dot:nth-child(3) { animation-delay: 0s; }
-@keyframes dotBounce {
-  0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
-  40% { transform: scale(1); opacity: 1; }
-}
-.loading-container p { color: #909399; }
-
-/* 空数据 */
-.empty-container { text-align: center; padding: 60px 0; }
-.empty-icon { font-size: 64px; margin-bottom: 16px; }
-.empty-text { font-size: 16px; color: #909399; margin-bottom: 20px; }
-.shop-btn { border-radius: 20px; padding: 10px 28px; }
-
-/* 订单列表 */
-.order-list { display: flex; flex-direction: column; gap: 16px; }
-
-/* 列表动画 */
-.order-anim-enter-active { transition: all 0.4s ease; }
-.order-anim-leave-active { transition: all 0.3s ease; }
-.order-anim-enter-from { opacity: 0; transform: translateX(-20px); }
-.order-anim-leave-to { opacity: 0; transform: translateX(20px); }
-
-/* 订单卡片 */
-.order-card {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.03);
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.order-card:hover {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
-}
-
-/* 头部 */
-.order-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  background: linear-gradient(135deg, #fafafa, #f5f7fa);
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.order-meta { display: flex; gap: 20px; align-items: center; }
-
-.order-id {
-  font-size: 14px;
-  font-weight: 700;
-  color: #303133;
-  font-family: 'Courier New', monospace;
-}
-
-.order-time { font-size: 13px; color: #909399; }
-
-.status-tag { font-weight: 600; border: none !important; }
-
-/* 内容 */
-.order-body { padding: 24px; }
-
-.order-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
 }
 
-.order-info-item {
+.orders__back {
+  height: 42px;
+}
+
+/* ---------- 状态标签 ---------- */
+.tabs {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px;
+  margin-bottom: 22px;
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-pill);
+  background: var(--c-surface);
+  box-shadow: var(--shadow-xs);
 }
 
-.info-icon { font-size: 20px; line-height: 1; }
-
-.info-label {
-  font-size: 12px;
-  color: #c0c4cc;
-  margin-bottom: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.info-value {
-  font-size: 15px;
-  color: #303133;
+.tabs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
   font-weight: 500;
+  color: var(--c-ink-2);
+  transition: all var(--dur) var(--ease-soft);
 }
 
-.price-value { color: #f56c6c; font-weight: 700; font-size: 18px; }
+.tabs__item:hover {
+  color: var(--c-ink);
+  background: var(--c-bg-soft);
+}
 
-.address-value {
-  max-width: 220px;
+.tabs__item.is-active {
+  background: var(--c-solid);
+  color: var(--c-on-solid);
+  box-shadow: 0 8px 18px -12px rgba(25, 23, 19, 0.9);
+}
+
+.tabs__count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(25, 23, 19, 0.07);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabs__item.is-active .tabs__count {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* ---------- 订单列表 ---------- */
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order {
   overflow: hidden;
-  text-overflow: ellipsis;
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-lg);
+  background: var(--c-surface);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--dur) var(--ease-soft), transform var(--dur) var(--ease-soft),
+    border-color var(--dur) var(--ease-soft);
+  animation: rise-in 0.4s var(--ease-out) both;
+}
+
+.order:hover {
+  transform: translateY(-2px);
+  border-color: var(--c-line-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.order__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--c-line);
+  background: var(--c-bg-soft);
+}
+
+.order__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.order__id {
+  font-size: 12.5px;
+  color: var(--c-ink-3);
+}
+
+.order__id strong {
+  color: var(--c-ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.order__sep {
+  width: 1px;
+  height: 12px;
+  background: var(--c-line-strong);
+}
+
+.order__time {
+  font-size: 12px;
+  color: var(--c-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
-/* 底部 */
-.order-footer {
-  padding: 12px 24px;
-  border-top: 1px solid #f5f5f5;
+.status__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status--warning {
+  background: var(--c-warning-soft);
+  color: var(--c-warning);
+}
+
+.status--brand {
+  background: var(--c-brand-soft);
+  color: var(--c-brand);
+}
+
+.status--success {
+  background: var(--c-success-soft);
+  color: var(--c-success);
+}
+
+.status--muted {
+  background: var(--c-surface-2);
+  color: var(--c-ink-3);
+}
+
+/* 主体 */
+.order__body {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 22px;
 }
 
-.order-actions { display: flex; gap: 12px; }
-
-.action-btn {
-  border-radius: 20px;
-  padding: 8px 22px;
-  font-weight: 500;
+.order__thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: 84px;
+  height: 100px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, #fbfaf7, #f1ece4);
+  transition: transform var(--dur) var(--ease-soft);
 }
 
-.pay-btn {
-  background: linear-gradient(135deg, #e6a23c, #f56c6c) !important;
-  border: none !important;
-  box-shadow: 0 4px 12px rgba(230, 162, 60, 0.3);
-  transition: all 0.3s ease !important;
+.order__thumb:hover {
+  transform: translateY(-2px) rotate(-1deg);
 }
 
-.pay-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(230, 162, 60, 0.4) !important;
+.order__thumb img {
+  position: absolute;
+  inset: 8px;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+  object-fit: contain;
+  mix-blend-mode: multiply;
 }
 
-.cancel-btn {
-  background: #fff !important;
-  border: 1px solid #e4e7ed !important;
-  color: #909399 !important;
+.order__product {
+  flex: 1;
+  min-width: 0;
 }
 
-.cancel-btn:hover {
-  border-color: #f56c6c !important;
-  color: #f56c6c !important;
+.order__name {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--c-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color var(--dur) var(--ease-soft);
 }
 
-.confirm-btn {
-  background: linear-gradient(135deg, #67c23a, #5daf34) !important;
-  border: none !important;
-  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.3);
-  transition: all 0.3s ease !important;
+.order__name:hover {
+  color: var(--c-brand);
 }
 
-.confirm-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(103, 194, 58, 0.4) !important;
+.order__desc {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--c-ink-3);
 }
 
-@media (max-width: 600px) {
-  .order-info-grid { grid-template-columns: 1fr; }
-  .order-meta { flex-direction: column; align-items: flex-start; gap: 4px; }
+.order__tags {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--c-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.order__amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.order__amount span {
+  font-size: 11.5px;
+  color: var(--c-ink-3);
+}
+
+.order__amount strong {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--c-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 底部 */
+.order__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 22px;
+  border-top: 1px solid var(--c-line);
+  background: var(--c-bg-soft);
+}
+
+.order__address {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--c-ink-2);
+}
+
+.order__address .el-icon {
+  flex-shrink: 0;
+  color: var(--c-ink-3);
+}
+
+.order__actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ---------- 骨架 ---------- */
+.order-skeleton {
+  overflow: hidden;
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-lg);
+  background: var(--c-surface);
+}
+
+.order-skeleton__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  background: var(--c-bg-soft);
+}
+
+.order-skeleton__body {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 22px;
+}
+
+.order-skeleton__img {
+  width: 84px;
+  height: 100px;
+  border-radius: var(--radius-md);
+}
+
+.order-skeleton__lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-skeleton__img,
+.order-skeleton .line {
+  background: linear-gradient(100deg, #f1ece4 30%, #f8f4ee 50%, #f1ece4 70%);
+  background-size: 300% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.line {
+  height: 12px;
+  border-radius: var(--radius-pill);
+}
+
+.line--xs {
+  width: 60px;
+}
+
+.line--sm {
+  width: 120px;
+}
+
+.line--md {
+  width: 42%;
+  height: 16px;
+}
+
+.line--full {
+  width: 90%;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 150% 0;
+  }
+
+  to {
+    background-position: -150% 0;
+  }
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 700px) {
+  .orders__head {
+    align-items: flex-start;
+  }
+
+  .order__body {
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .order__product {
+    flex-basis: calc(100% - 110px);
+  }
+
+  .order__amount {
+    width: 100%;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px dashed var(--c-line);
+  }
+
+  .order__amount strong {
+    font-size: 19px;
+  }
+
+  .order__foot {
+    padding: 14px 16px;
+  }
+
+  .order__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .order__head {
+    padding: 12px 16px;
+  }
+
+  .tabs__item {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding: 0 12px;
+  }
 }
 </style>

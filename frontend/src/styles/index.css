@@ -1,0 +1,10 @@
+/**
+ * 样式入口：重置 → 变量 → 基础 → 组件库覆盖
+ * 顺序不可调整，后者依赖前者的变量定义。
+ */
+@import './reset.css';
+@import './tokens.css';
+@import './base.css';
+@import './element.css';
+@import './auth.css';
+@import './dark.css';

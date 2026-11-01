@@ -12,6 +12,11 @@ public interface ProductService {
     Product getByProductName(String productName);
 
     /**
+     * 根据商品 ID 查询
+     */
+    Product getById(Long productId);
+
+    /**
      * 新增商品
      */
     void add(Product product);

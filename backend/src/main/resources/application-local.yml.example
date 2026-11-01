@@ -1,0 +1,6 @@
+# 复制为 application-local.yml 后填写本机数据库账号
+# 该文件只用于本地开发，application-local.yml 已被 .gitignore 忽略
+spring:
+  datasource:
+    username: root
+    password: 你的数据库密码

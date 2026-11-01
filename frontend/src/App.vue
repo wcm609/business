@@ -1,179 +1,43 @@
 <template>
-  <div id="app-root">
-    <NavBar v-if="!isAuthPage" />
-    <div :class="{ 'has-nav': !isAuthPage }">
-      <router-view v-slot="{ Component }">
-        <transition name="page" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
+  <el-config-provider :locale="elementLocale">
+    <div id="app-root">
+      <NavBar v-if="!isAuthPage" />
+
+      <main class="app-main" :class="{ 'app-main--auth': isAuthPage }">
+        <router-view v-slot="{ Component }">
+          <transition name="page" mode="out-in">
+            <component :is="Component" :key="route.path" />
+          </transition>
+        </router-view>
+      </main>
+
+      <AppFooter v-if="!isAuthPage" />
+      <el-backtop v-if="!isAuthPage" :right="26" :bottom="26" />
     </div>
-  </div>
+  </el-config-provider>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
+import en from 'element-plus/es/locale/lang/en'
 import NavBar from './components/NavBar.vue'
+import AppFooter from './components/AppFooter.vue'
+import { useI18n } from './i18n'
 
 const route = useRoute()
+const { locale, t } = useI18n()
 
-const authPages = ['Login', 'Register']
-const isAuthPage = computed(() => authPages.includes(route.name))
+/** 登录 / 注册页使用独立布局（无导航栏、页脚） */
+const isAuthPage = computed(() => Boolean(route.meta.authLayout))
+
+/** Element Plus 内置文案（分页、日期等）跟随语言切换 */
+const elementLocale = computed(() => (locale.value === 'en' ? en : zhCn))
+
+// 页面标题随语言与路由同步
+watchEffect(() => {
+  const pageTitle = route.meta.titleKey ? t(route.meta.titleKey) : ''
+  document.title = pageTitle ? `${pageTitle} · ${t('common.brand')}` : t('common.defaultTitle')
+})
 </script>
-
-<style>
-/* ===== 全局样式重置 ===== */
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue',
-    Helvetica, Arial, sans-serif;
-  background: #f0f2f5;
-  color: #303133;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-/* 滚动条美化 */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c0c4cc;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #909399;
-}
-
-/* 内容区域上边距 */
-.has-nav {
-  padding-top: 64px;
-}
-
-/* ===== 页面切换动画 ===== */
-.page-enter-active {
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.page-leave-active {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.page-enter-from {
-  opacity: 0;
-  transform: translateY(20px) scale(0.98);
-}
-
-.page-leave-to {
-  opacity: 0;
-  transform: translateY(-10px) scale(0.98);
-}
-
-/* ===== Element Plus 全局覆盖 ===== */
-/* 统一的暗色毛玻璃按钮 */
-.el-button--primary {
-  background: linear-gradient(135deg, #409EFF, #667eea) !important;
-  border: none !important;
-  transition: all 0.3s ease !important;
-}
-
-.el-button--primary:hover {
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.3) !important;
-}
-
-.el-button--primary:active {
-  transform: translateY(0) !important;
-}
-
-/* Tag 圆角 */
-.el-tag {
-  border-radius: 6px;
-}
-
-/* Tabs 样式增强 */
-.el-tabs__item {
-  font-weight: 500 !important;
-  transition: color 0.3s !important;
-}
-
-.el-tabs__item:hover {
-  color: #409EFF !important;
-}
-
-.el-tabs__active-bar {
-  height: 3px;
-  border-radius: 3px;
-  background: linear-gradient(90deg, #409EFF, #667eea) !important;
-}
-
-/* Pagination 圆角 */
-.el-pagination .el-pager li {
-  border-radius: 8px !important;
-  font-weight: 600 !important;
-  margin: 0 2px;
-}
-
-.el-pagination .el-pager li.active {
-  background: linear-gradient(135deg, #409EFF, #667eea) !important;
-  border: none !important;
-}
-
-/* Select 下拉 */
-.el-select-dropdown__item.selected {
-  color: #409EFF !important;
-  font-weight: 600 !important;
-}
-
-/* Dialog */
-.el-dialog {
-  border-radius: 16px !important;
-}
-
-.el-dialog__header {
-  padding: 20px 24px 0 !important;
-}
-
-.el-dialog__body {
-  padding: 20px 24px !important;
-}
-
-.el-dialog__footer {
-  padding: 0 24px 20px !important;
-}
-
-/* Message 样式加强 */
-.el-message {
-  border-radius: 10px !important;
-  border: none !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
-  padding: 12px 20px !important;
-}
-
-/* Input 内部边框清理 */
-.el-input__wrapper {
-  box-shadow: none !important;
-}
-</style>

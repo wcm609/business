@@ -16,8 +16,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // 需要登录的接口：订单相关、个人信息、修改密码、商品新增
+        // 登录、注册、商品浏览保持匿名可访问
         registry.addInterceptor(jwtInterceptor)
-                .addPathPatterns("/order/**")
-                .excludePathPatterns("/user/**", "/product/**");
+                .addPathPatterns("/order/**", "/user/info", "/user/password", "/product/add")
+                .excludePathPatterns("/user/login", "/user/register");
     }
 }

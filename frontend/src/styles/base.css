@@ -1,0 +1,174 @@
+/**
+ * 全局基础样式与通用布局工具类
+ * 页面内的样式仍使用 scoped，这里只放跨页面复用的部分。
+ */
+
+body {
+  font-family: var(--font-sans);
+  color: var(--c-ink);
+  background-color: var(--c-bg);
+  /* 顶部两团极淡的暖色光晕，让大面积留白不显单调 */
+  background-image:
+    radial-gradient(1000px 520px at 12% -12%, rgba(194, 68, 47, 0.07), transparent 60%),
+    radial-gradient(900px 520px at 92% -8%, rgba(176, 138, 79, 0.1), transparent 62%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+/* ---------- 布局容器 ---------- */
+.container {
+  width: min(var(--container), 100% - 48px);
+  margin-inline: auto;
+}
+
+.page {
+  padding: 40px 0 88px;
+}
+
+/* ---------- 文字工具类 ---------- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--c-brand);
+}
+
+.eyebrow::before {
+  content: '';
+  width: 22px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.page-title {
+  font-size: clamp(28px, 3.2vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--c-ink);
+}
+
+.page-subtitle {
+  margin-top: 10px;
+  color: var(--c-ink-3);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--c-ink);
+}
+
+.muted {
+  color: var(--c-ink-3);
+}
+
+/* ---------- 价格 ---------- */
+.price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  color: var(--c-brand);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.price__symbol {
+  font-size: 0.72em;
+  font-weight: 600;
+  transform: translateY(-0.04em);
+}
+
+/* ---------- 卡片 ---------- */
+.card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- 页面进入动画 ---------- */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.rise-in {
+  animation: rise-in var(--dur-slow) var(--ease-out) both;
+}
+
+/* ---------- 路由切换动画 ---------- */
+.page-enter-active {
+  transition: opacity 0.32s var(--ease-out), transform 0.32s var(--ease-out);
+}
+
+.page-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ---------- 应用外壳 ---------- */
+.app-main {
+  padding-top: var(--nav-height);
+  min-height: calc(100vh - var(--nav-height));
+}
+
+.app-main--auth {
+  padding-top: 0;
+}
+
+/* ---------- 移动端适配 ---------- */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
+  .container {
+    width: min(var(--container), 100% - 32px);
+  }
+
+  .page {
+    padding: 24px 0 64px;
+  }
+}

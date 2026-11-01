@@ -24,4 +24,9 @@ public interface UserService {
      * 根据用户 ID 查找用户
      */
     User getUserById(Long userId);
+
+    /**
+     * 修改密码
+     */
+    void changePassword(Long userId, String oldPassword, String newPassword);
 }
